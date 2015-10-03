@@ -107,8 +107,8 @@ def send_mail(**kwargs):
         mailer_config["transport.port"] = kwargs["port"]
     if kwargs["username"]:
         mailer_config["transport.username"] = kwargs["username"]
-    if kwargs["transport.password"]:
-        mailer_config["password"] = kwargs["password"]
+    if kwargs["password"]:
+        mailer_config["transport.password"] = kwargs["password"]
 
     mailer = Mailer(mailer_config)
     mailer.start()
