@@ -97,19 +97,21 @@ def generate_output(results, config_directory, output_path):
 
 def send_mail(**kwargs):
     """Sends an email message"""
-    mail_server = dict(
-                use='smtp',
-                host=kwargs["host"])
+    mailer_config = {
+        'manager.use': 'immediate',
+        'transport.use': 'smtp',
+        'transport.host': kwargs['host'],
+    }
 
     if kwargs["port"]:
-        mail_server["port"] = kwargs["port"]
+        mailer_config["transport.port"] = kwargs["port"]
     if kwargs["username"]:
-        mail_server["username"] = kwargs["username"]
-    if kwargs["password"]:
-        mail_server["password"] = kwargs["password"]
+        mailer_config["transport.username"] = kwargs["username"]
+    if kwargs["transport.password"]:
+        mailer_config["password"] = kwargs["password"]
 
-    mailer = Mailer(mail_server)
-    mailer.start(dict(transport=mail_server))
+    mailer = Mailer(mailer_config)
+    mailer.start()
 
     message = Message(author=kwargs['from'], to=kwargs["to".split(", ")])
     message.subject = kwargs["subject"]
