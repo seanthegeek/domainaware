@@ -51,6 +51,8 @@ For recording and tracking threat information, check out the [CRITs](https://git
 If you need reliable external SMTP service, [Mandrill](https://www.mandrill.com/) from MailChimp 
 provides low-cost service for transactional mail.
 
+Check for and download new versions of dnstwist regularly.
+
 ## Background
 
 domainaware was inspired is inspired by Mike Saunders' [CrazyParser](https://github.com/hardwaterhacker/CrazyParser).

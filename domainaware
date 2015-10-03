@@ -16,11 +16,10 @@ from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 
-
 from requests import get
 
-__authors__ = 'Sean Whalen'
-__version__ = '1.0.0'
+__author__ = 'Sean Whalen'
+__version__ = '1.0.1'
 
 
 def dt_whois(domain, **kwargs):
@@ -66,15 +65,15 @@ def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **dt_co
                         whois = dt_whois(row['Domain'], **dt_config)
                         if 'registrant' in whois:
                             row["Registrant"] = whois["registrant"]
-                    if 'registration' in whois:
-                        if 'registrar' in whois['registration']:
-                            row["Registrar"] = whois['registration']["registrar"]
-                        if 'created' in whois['registration']:
-                            row["Created"] = whois['registration']["created"]
-                        if 'updated' in whois['registration']:
-                            row["Updated"] = whois['registration']["updated"]
-                        if 'expires' in whois['registration']:
-                            row["Expires"] = whois['registration']["expires"]
+                        if 'registration' in whois:
+                            if 'registrar' in whois['registration']:
+                                row["Registrar"] = whois['registration']["registrar"]
+                            if 'created' in whois['registration']:
+                                row["Created"] = whois['registration']["created"]
+                            if 'updated' in whois['registration']:
+                                row["Updated"] = whois['registration']["updated"]
+                            if 'expires' in whois['registration']:
+                                row["Expires"] = whois['registration']["expires"]
                     new_domains.append(row)
 
     return sorted(new_domains, key=get_row_domain)
@@ -87,7 +86,7 @@ def generate_output(results, config_directory, output_path):
     # this file will only contain the header if there are no new results
     with open(output_path, 'wb') as outfile:
         fieldnames = ['Fuzzer', 'Domain', 'Registrant', 'Registrar', 'Created', 'Updated', 'Expires',
-                      'A', 'AAAA', 'MX', 'NS', 'Country', 'SSDEEP', '']
+                      'A', 'AAAA', 'MX', 'NS', 'Country', 'SSDEEP']
         writer = DictWriter(outfile, fieldnames=fieldnames)
         writer.writeheader()
         for row in results:
