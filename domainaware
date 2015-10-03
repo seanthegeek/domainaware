@@ -1,0 +1,213 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""A dnstwist wrapper for emailing security staff when possible typo sqatting/spear
+phishing domains have been registered"""
+
+from ConfigParser import ConfigParser
+from argparse import ArgumentParser
+from os import path, getcwd
+from subprocess import check_output, PIPE
+from StringIO import StringIO
+from csv import DictReader, DictWriter
+from smtplib import SMTP
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE
+
+
+from requests import get
+
+__authors__ = 'Sean Whalen'
+__version__ = '1.0.0'
+
+
+def dt_whois(domain, **kwargs):
+    """Returns WHOIS data from DomainTools"""
+    user_agent = "domainalert/{}".format(__version__)
+    headers = {"User-Agent": user_agent}
+    params = dict(api_username=kwargs["api_username"], api_key=kwargs["api_key"])
+    url = "https://api.domaintools.com/v1/{}/whois".format(domain)
+    if kwargs["parsed_whois"].lower() == "true":
+        url += "/parsed"
+    response = get(url, headers=headers, params=params)
+    if response.status_code == 403:
+        raise RuntimeError("DomainTools authentication failed")
+    if response.status_code == 404:
+        return dict()
+    return response.json()["response"]
+
+
+def get_row_domain(row):
+    return row['Domain']
+
+
+def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **dt_config):
+    """"Returns suspicious domain information as a list of dictionaries"""
+    new_domains = []
+    with open(known_domains_path, 'rbU') as known_domains_file:
+        known_domains = known_domains_file.readlines()
+
+    with open(my_domains_path, 'rbU') as domains:
+        for domain in domains:
+            domain = domain.strip()
+            dt_args = [dnstwist_path, '-grc', domain]
+            output = check_output(dt_args, stderr=PIPE)
+            new_domains_csv = DictReader(StringIO(output))
+            # skip first row; it contains original domain
+            next(new_domains_csv)
+            for row in new_domains_csv:
+                if row['Domain'] not in known_domains:
+                    if dt_config["api_username"] and dt_config["api_key"]:
+                        whois = dt_whois(row['Domain'], **dt_config)
+                        if 'registrant' in whois:
+                            row["Registrant"] = whois["registrant"]
+                    if 'registration' in whois:
+                        if 'registrar' in whois['registration']:
+                            row["Registrar"] = whois['registration']["registrar"]
+                        if 'created' in whois['registration']:
+                            row["Created"] = whois['registration']["created"]
+                        if 'updated' in whois['registration']:
+                            row["Updated"] = whois['registration']["updated"]
+                        if 'expires' in whois['registration']:
+                            row["Expires"] = whois['registration']["expires"]
+                    new_domains.append(row)
+
+    return sorted(new_domains, key=get_row_domain)
+
+
+def generate_output(results, config_directory, output_path):
+    """"PWrites output files"""
+    domains = []
+    # write out results
+    # this file will only contain the header if there are no new results
+    with open(output_path, 'wb') as outfile:
+        fieldnames = ['Fuzzer', 'Domain', 'Registrant', 'Registrar', 'Created', 'Updated', 'Expires',
+                      'A', 'AAAA', 'MX', 'NS', 'Country', 'SSDEEP', '']
+        writer = DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in results:
+            domains.append(row['Domain'])
+            writer.writerow(row)
+    outfile.close()
+
+    with open(path.join(config_directory, "last_domains"), "w") as last_domains_file:
+        last_domains_file.writelines(domains)
+
+
+def send_mail(**kwargs):
+    """Sends an email message"""
+    msg = MIMEMultipart()
+    msg["From"] = kwargs["from"]
+    msg["To"] = kwargs['to']
+    msg["Subject"] = kwargs["subject"]
+
+    msg.attach(MIMEText(kwargs['body']))
+
+    if "files" in kwargs:
+        files = kwargs['files']
+    else:
+        files = None
+
+    for f in files or []:
+        with open(f, "rb") as fil:
+            msg.attach(MIMEApplication(
+                fil.read(),
+                Content_Disposition='attachment; filename="{}"'.format(path.basename(f)),
+                Name=path.basename(f)
+            ))
+
+    mail_server = SMTP(kwargs["host"], kwargs["port"])
+    mail_server.ehlo()
+    if kwargs["starttls"].lower() == "true":
+        mail_server.starttls()
+        mail_server.ehlo()
+    if kwargs["username"]:
+        mail_server.login(kwargs["username"], kwargs["password"])
+    mail_server.sendmail(kwargs["from"], kwargs["to"].split(COMMASPACE), msg.as_string())
+    mail_server.quit()
+
+
+def mail_report(output_file_path, **kwargs):
+    """Mail the report"""
+    num_lines = 0
+    with open(output_file_path, 'rbU') as output_file:
+        for line in output_file:
+            num_lines += 1
+            num_domains = num_lines - 1 # Ignore CSV header in count
+    if num_domains > 0:
+        kwargs["files"] = [output_file_path]
+        kwargs["body"] = kwargs["new_results_body"]
+    else:
+        kwargs["body"] = kwargs["no_new_results_body"]
+
+    send_mail(**kwargs)
+
+
+def main():
+    """Called when the module is executed rather than imported"""
+    parser = ArgumentParser(prog='domainaware',
+                            description=__doc__,
+                            version=__version__, add_help=True)
+    parser.add_argument('-c', '--config',
+                        help='Directory location for required config files; defaults to the current working directory',
+                        default=getcwd(),
+                        required=False)
+    parser.add_argument('-o', '--output', help='Path to output to; defaults to results.csv', default='results.csv',
+                        required=False)
+    parser.add_argument('-m', '--email', help='Email results upon completion; defaults to False', action="store_true",
+                        default=False, required=False)
+
+    args = parser.parse_args()
+
+    if not path.isdir(args.config):
+        print "ERROR! Specified configuration directory {} does not exist!".format(args.config)
+        exit(-1)
+
+    config_file_path = path.join(args.config, "settings.cfg")
+    if not path.exists(config_file_path):
+        print("ERROR! {} does not exist!".format(config_file_path))
+        exit(-1)
+
+    output_path = args.output
+    my_domains_path = path.join(args.config, 'mydomains.csv')
+    known_domains_path = path.join(args.config, 'knowndomains.csv')
+
+    config = ConfigParser(allow_no_value=True)
+    config.read([config_file_path])
+
+    paths_config = dict(config.items("paths"))
+    email_config = dict(config.items("email"))
+    email_config["results_file"] = output_path
+    dt_config = dict(config.items("domaintools"))
+
+    last_domains_path = path.join(args.config, "last_domains")
+    stale = True
+    if path.exists(last_domains_path):
+        with open(last_domains_path) as last_domains_file:
+            last_domains = last_domains_file.readlines()
+        with open(known_domains_path) as known_csv:
+            csv_reader = DictReader(known_csv)
+            for csv_row in csv_reader:
+                if csv_row['Domain'] not in last_domains:
+                    stale = False
+                    break
+    else:
+        stale = False
+
+    if stale:
+        if args.email:
+            email_config["body"] = email_config["stale_body"]
+            send_mail(**email_config)
+            exit(2)
+
+    results = find_new_domains(paths_config['dnstwist'], my_domains_path, known_domains_path, **dt_config)
+
+    generate_output(results, args.config, output_path)
+
+    if args.email:
+        mail_report(args.output, **email_config)
+
+if __name__ == "__main__":
+    main()

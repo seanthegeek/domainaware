@@ -55,3 +55,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+.idea/
+#*.csv
+#*.cfg
+last_domains
