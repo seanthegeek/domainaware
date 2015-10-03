@@ -39,10 +39,11 @@ def dt_whois(domain, **kwargs):
 
 
 def get_row_domain(row):
+    """Used as the key for sorting CSV rows by domain"""
     return row['Domain']
 
 
-def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **dt_config):
+def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **kwargs):
     """"Returns suspicious domain information as a list of dictionaries"""
     new_domains = []
     with open(known_domains_path, 'rbU') as known_domains_file:
@@ -61,8 +62,8 @@ def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **dt_co
                 continue  # There were no results for that domain
             for row in new_domains_csv:
                 if row['Domain'] not in known_domains:
-                    if dt_config["api_username"] and dt_config["api_key"]:
-                        whois = dt_whois(row['Domain'], **dt_config)
+                    if kwargs["api_username"] and kwargs["api_key"]:
+                        whois = dt_whois(row['Domain'], **kwargs)
                         if 'registrant' in whois:
                             row["Registrant"] = whois["registrant"]
                         if 'registration' in whois:
