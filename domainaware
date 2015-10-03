@@ -108,7 +108,7 @@ def send_mail(**kwargs):
     if kwargs["password"]:
         mail_server["password"] = kwargs["password"]
 
-    mailer = Mailer()
+    mailer = Mailer(mail_server)
     mailer.start(dict(transport=mail_server))
 
     message = Message(author=kwargs['from'], to=kwargs["to".split(", ")])
