@@ -10,13 +10,9 @@ from os import path, getcwd
 from subprocess import check_output, PIPE
 from StringIO import StringIO
 from unicodecsv import DictReader, DictWriter
-from smtplib import SMTP
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from email.mime.text import MIMEText
-from email.utils import COMMASPACE
 
 from requests import get
+from marrow.mailer import Mailer, Message
 
 __author__ = 'Sean Whalen'
 __version__ = '1.0.1'
@@ -101,35 +97,30 @@ def generate_output(results, config_directory, output_path):
 
 def send_mail(**kwargs):
     """Sends an email message"""
-    msg = MIMEMultipart()
-    msg["From"] = kwargs["from"]
-    msg["To"] = kwargs['to']
-    msg["Subject"] = kwargs["subject"]
+    mail_server = dict(
+                use='smtp',
+                host=kwargs["host"])
 
-    msg.attach(MIMEText(kwargs['body']))
-
-    if "files" in kwargs:
-        files = kwargs['files']
-    else:
-        files = None
-
-    for f in files or []:
-        with open(f, "rb") as fil:
-            msg.attach(MIMEApplication(
-                fil.read(),
-                Content_Disposition='attachment; filename="{}"'.format(path.basename(f)),
-                Name=path.basename(f)
-            ))
-
-    mail_server = SMTP(kwargs["host"], kwargs["port"])
-    mail_server.ehlo()
-    if kwargs["starttls"].lower() == "true":
-        mail_server.starttls()
-        mail_server.ehlo()
+    if kwargs["port"]:
+        mail_server["port"] = kwargs["port"]
     if kwargs["username"]:
-        mail_server.login(kwargs["username"], kwargs["password"])
-    mail_server.sendmail(kwargs["from"], kwargs["to"].split(COMMASPACE), msg.as_string())
-    mail_server.quit()
+        mail_server["username"] = kwargs["username"]
+    if kwargs["password"]:
+        mail_server["password"] = kwargs["password"]
+
+    mailer = Mailer()
+    mailer.start(dict(transport=mail_server))
+
+    message = Message(author=kwargs['from'], to=kwargs["to".split(", ")])
+    message.subject = kwargs["subject"]
+    message.plain = kwargs["body"]
+
+    for file_path in kwargs['files']:
+        message.attach(file_path)
+
+    mailer.send(message)
+
+    mailer.stop()
 
 
 def mail_report(output_file_path, **kwargs):
