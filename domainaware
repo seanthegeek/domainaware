@@ -55,8 +55,11 @@ def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **dt_co
             dt_args = [dnstwist_path, '-grc', domain]
             output = check_output(dt_args, stderr=PIPE)
             new_domains_csv = DictReader(StringIO(output))
-            # skip first row; it contains original domain
-            next(new_domains_csv)
+            try:
+                # skip first row; it contains original domain
+                next(new_domains_csv)
+            except StopIteration:
+                continue  # There were no results for that domain
             for row in new_domains_csv:
                 if row['Domain'] not in known_domains:
                     if dt_config["api_username"] and dt_config["api_key"]:
@@ -132,10 +135,11 @@ def send_mail(**kwargs):
 def mail_report(output_file_path, **kwargs):
     """Mail the report"""
     num_lines = 0
+    num_domains = 0
     with open(output_file_path, 'rbU') as output_file:
         for line in output_file:
             num_lines += 1
-            num_domains = num_lines - 1 # Ignore CSV header in count
+            num_domains = num_lines - 1  # Ignore CSV header in count
     if num_domains > 0:
         kwargs["files"] = [output_file_path]
         kwargs["body"] = kwargs["new_results_body"]
