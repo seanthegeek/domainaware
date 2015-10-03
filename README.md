@@ -7,6 +7,7 @@ phishing domains have been registered
 ## Dependencies
 
 - Python 2.7
+- [unicodecsv](https://pypi.python.org/pypi/unicodecsv)
 - [Requests: HTTP for Humans](http://www.python-requests.org/)
 - [dnstwist](https://github.com/elceef/dnstwist)
   - [DNS toolkit for Python](http://www.dnspython.org/)

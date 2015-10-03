@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from os import path, getcwd
 from subprocess import check_output, PIPE
 from StringIO import StringIO
-from csv import DictReader, DictWriter
+from unicodecsv import DictReader, DictWriter
 from smtplib import SMTP
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
