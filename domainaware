@@ -113,7 +113,7 @@ def send_mail(**kwargs):
     mailer = Mailer(mailer_config)
     mailer.start()
 
-    message = Message(author=kwargs['from'], to=tuple(kwargs["to".split(", ")]))
+    message = Message(author=kwargs['from'], to=kwargs["to"].split(", "))
     message.subject = kwargs["subject"]
     message.plain = kwargs["body"]
 
