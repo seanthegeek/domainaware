@@ -8,9 +8,10 @@ phishing domains have been registered
 
 - Python 2.7
 - [unicodecsv](https://pypi.python.org/pypi/unicodecsv)
-- [Requests: HTTP for Humans](http://www.python-requests.org/)
+- [marrow.mailer](https://pypi.python.org/pypi/marrow.mailer)
+- [Requests](https://pypi.python.org/pypi/requests/)
 - [dnstwist](https://github.com/elceef/dnstwist)
-  - [DNS toolkit for Python](http://www.dnspython.org/)
+  - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
     - [MaxMind Legacy Country GeoIP Database](https://dev.maxmind.com/geoip/legacy/install/country/)
 
