@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""A dnstwist wrapper for emailing security staff when possible typo sqatting/spear
+"""A dnstwist and/or URLCrazy wrapper for emailing security staff when possible typo sqatting/spear
 phishing domains have been registered"""
 
 from ConfigParser import ConfigParser
@@ -15,7 +15,7 @@ from requests import get
 from marrow.mailer import Mailer, Message
 
 __author__ = 'Sean Whalen'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 
 
 def dt_whois(domain, **kwargs):
@@ -39,39 +39,96 @@ def get_row_domain(row):
     return row['Domain']
 
 
-def find_new_domains(dnstwist_path, my_domains_path, known_domains_path, **kwargs):
+def convert_country(name):
+    """Converts a country name from urlcrazy format to dnstwist format"""
+    words = name.split(" ")
+    for i in range(len(words)):
+        words[i] = words[i].lower()
+        words[i][0] = words[i][0].upper()
+    name = " ".join(words)
+
+    return name
+
+
+def crazy_twist(crazy_row):
+    """Converts a urlcrazy row to dnstwist format"""
+    fuzzer_map = {
+        "Character Omission": "Omission",
+        "Character Repeat": "Repetition",
+        "Character Swap": "Transposition",
+        "Character Replacement": "Replacement",
+        "Character Insertion": "Insertion",
+        "Common Misspelling": "Misspelling",
+        "Bit Flipping": "Bitsquatting",
+        "Homoglyphs": "Homoglyph",
+        "Wrong SLD": "Subdomain"
+    }
+
+    fuzzer = crazy_row["Typo Type"]
+    if fuzzer is fuzzer_map:
+        fuzzer = fuzzer_map[fuzzer]
+
+    if crazy_row["DNS-A"] == "?":
+        crazy_row["DNS-A"] = None
+
+    twist_row = {
+        "Fuzzer": fuzzer,
+        "Domain": crazy_row["Typo"],
+        "A": crazy_row["DNS-A"],
+        "MX": crazy_row["DNS-MX"],
+        "Country": convert_country(crazy_row["Country-A"])
+    }
+
+    return twist_row
+
+
+def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
     """"Returns suspicious domain information as a list of dictionaries"""
     new_domains = []
     with open(known_domains_path, 'rbU') as known_domains_file:
         known_domains = known_domains_file.readlines()
 
-    with open(my_domains_path, 'rbU') as domains:
-        for domain in domains:
-            domain = domain.strip()
-            dt_args = [dnstwist_path, '-grc', domain]
-            output = check_output(dt_args, stderr=PIPE)
-            new_domains_csv = DictReader(StringIO(output))
-            try:
-                # skip first row; it contains original domain
-                next(new_domains_csv)
-            except StopIteration:
-                continue  # There were no results for that domain
-            for row in new_domains_csv:
-                if row['Domain'] not in known_domains:
-                    if kwargs["api_username"] and kwargs["api_key"]:
-                        whois = dt_whois(row['Domain'], **kwargs)
-                        if 'registrant' in whois:
-                            row["Registrant"] = whois["registrant"]
-                        if 'registration' in whois:
-                            if 'registrar' in whois['registration']:
-                                row["Registrar"] = whois['registration']["registrar"]
-                            if 'created' in whois['registration']:
-                                row["Created"] = whois['registration']["created"]
-                            if 'updated' in whois['registration']:
-                                row["Updated"] = whois['registration']["updated"]
-                            if 'expires' in whois['registration']:
-                                row["Expires"] = whois['registration']["expires"]
-                    new_domains.append(row)
+    with open(my_domains_path, 'rbU') as my_domains:
+        for my_domain in my_domains:
+            my_domain = my_domain.strip().lower()
+            if tool_paths["dnstwist"]:
+                dt_args = [tool_paths["dnstwist"], '-grc', my_domain]
+                output = check_output(dt_args, stderr=PIPE)
+                dnstwist_csv = DictReader(StringIO(output))
+                try:
+                    # skip first row; it contains original domain
+                    next(dnstwist_csv)
+                except StopIteration:
+                    continue  # There were no results for that domain
+                for row in dnstwist_csv:
+                    if row['Domain'] not in known_domains:
+                        new_domains.append(row)
+
+            if tool_paths["urlcrazy"]:
+                dt_args = [tool_paths["urlcrazy"], '-f', 'csv', my_domain]
+                output = check_output(dt_args, stderr=PIPE)
+                urlcrazy_csv = DictReader(StringIO(output))
+                for row in urlcrazy_csv:
+                    row = crazy_twist(row)
+                    if row["A"] is None:
+                        continue
+                    if row['Domain'] not in known_domains:
+                        new_domains.append(row)
+
+    if kwargs["api_username"] and kwargs["api_key"]:
+        for row in new_domains:
+            whois = dt_whois(row['Domain'], **kwargs)
+            if 'registrant' in whois:
+                row["Registrant"] = whois["registrant"]
+            if 'registration' in whois:
+                if 'registrar' in whois['registration']:
+                    row["Registrar"] = whois['registration']["registrar"]
+                if 'created' in whois['registration']:
+                    row["Created"] = whois['registration']["created"]
+                if 'updated' in whois['registration']:
+                    row["Updated"] = whois['registration']["updated"]
+                if 'expires' in whois['registration']:
+                    row["Expires"] = whois['registration']["expires"]
 
     return sorted(new_domains, key=get_row_domain)
 
@@ -199,7 +256,7 @@ def main():
             send_mail(**email_config)
             exit(2)
 
-    results = find_new_domains(paths_config['dnstwist'], my_domains_path, known_domains_path, **dt_config)
+    results = find_new_domains(paths_config, my_domains_path, known_domains_path, **dt_config)
 
     generate_output(results, args.config, output_path)
 

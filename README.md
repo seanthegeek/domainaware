@@ -1,15 +1,17 @@
 # domainaware
  *Remain aware with domainaware*
 
-A [dnstwist](https://github.com/elceef/dnstwist) wrapper for emailing security staff when possible typo sqatting/spear 
-phishing domains have been registered
+A [dnstwist](https://github.com/elceef/dnstwist) and/or [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
+wrapper for emailing security staff when possible typo sqatting/spear phishing domains have been registered
 
 ## Dependencies
 
 - Python 2.7
+- Ruby
 - [unicodecsv](https://pypi.python.org/pypi/unicodecsv)
 - [marrow.mailer](https://pypi.python.org/pypi/marrow.mailer)
 - [Requests](https://pypi.python.org/pypi/requests/)
+- [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
 - [dnstwist](https://github.com/elceef/dnstwist)
   - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
@@ -19,7 +21,7 @@ phishing domains have been registered
 
 After installing the above dependencies, edit the `settings.cfg` file:
 
-- Set the path to dnstwist
+- Set the path to dnstwist and URLCrazy
 - Configure the email settings
 
 If you have a subscription to the 
@@ -61,10 +63,9 @@ domainaware was inspired is inspired by Mike Saunders' [CrazyParser](https://git
 It started as a fork, but by the time I made all the changes I wanted, I realized that I had almost completely different
 code, with a similar concept. The main differences are:
 
-- `urlcrazy` is not used, because it generates domains which may not be registered
 - Python coding standards are followed
 - Configuration in a file, rather than within the code
 - Email notification if `knowndomains.csv` has not been updated since the last run 
-- NS, MX, A, AAAA DNS records, and country and fuzzer information from dnstwist are included in the results
+- NS, MX, A, and AAAA DNS records, and country and fuzzer information are included in the results
 - Domain information is stored in memory rather than temporary files
 - Integration with the DomainTools WHOIS APIs
