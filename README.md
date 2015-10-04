@@ -6,9 +6,8 @@ wrapper for emailing security staff when possible typo sqatting/spear phishing d
 
 ## Dependencies
 
-- Python 2.7
+- Python 3
 - Ruby
-- [unicodecsv](https://pypi.python.org/pypi/unicodecsv)
 - [marrow.mailer](https://pypi.python.org/pypi/marrow.mailer)
 - [Requests](https://pypi.python.org/pypi/requests/)
 - [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)

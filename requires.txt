@@ -1,3 +1,2 @@
-unicodecsv
 requests
 marrow.mailer
