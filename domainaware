@@ -43,8 +43,7 @@ def convert_country(name):
     """Converts a country name from urlcrazy format to dnstwist format"""
     words = name.split(" ")
     for i in range(len(words)):
-        words[i] = words[i].lower()
-        words[i][0] = words[i][0].upper()
+        words[i] = words[i].lower().title()
     name = " ".join(words)
 
     return name
