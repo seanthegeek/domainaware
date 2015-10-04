@@ -106,7 +106,7 @@ def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
             if tool_paths["urlcrazy"]:
                 dt_args = [tool_paths["urlcrazy"], '-f', 'csv', my_domain]
                 output = check_output(dt_args, stderr=PIPE)
-                urlcrazy_csv = DictReader(StringIO(output))
+                urlcrazy_csv = DictReader(StringIO(output), encoding='latin-1')
                 for row in urlcrazy_csv:
                     row = crazy_twist(row)
                     if row["A"] is None:
