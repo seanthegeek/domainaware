@@ -1,2 +1,4 @@
 requests
 marrow.mailer
+dnspython
+GeoIP

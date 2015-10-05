@@ -1,5 +1,5 @@
-# domainaware
- *Remain aware with domainaware*
+# DomainAware
+ *Remain aware with DomainAware*
 
 A [dnstwist](https://github.com/elceef/dnstwist) and/or [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
 wrapper for emailing security staff when possible typo sqatting/spear phishing domains have been registered
@@ -11,10 +11,13 @@ wrapper for emailing security staff when possible typo sqatting/spear phishing d
 - [marrow.mailer](https://pypi.python.org/pypi/marrow.mailer)
 - [Requests](https://pypi.python.org/pypi/requests/)
 - [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
-- [dnstwist](https://github.com/elceef/dnstwist)
+- [dnstwist](https://github.com/seanthegeek/dnstwist/tree/patch-1)
   - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
     - [MaxMind Legacy Country GeoIP Database](https://dev.maxmind.com/geoip/legacy/install/country/)
+
+Please note: There is currently [a bug](https://github.com/elceef/dnstwist/pull/27) in dnstwist that causes it to generate invalid CSV data, breaking DomainAware.
+Please use the version from [my branch](https://github.com/seanthegeek/dnstwist/tree/patch-1) until the patch is merged.
 
 ## Use
 
@@ -58,7 +61,7 @@ Check for and download new versions of dnstwist regularly.
 
 ## Background
 
-domainaware was inspired is inspired by Mike Saunders' [CrazyParser](https://github.com/hardwaterhacker/CrazyParser).
+DomainAware was inspired is inspired by Mike Saunders' [CrazyParser](https://github.com/hardwaterhacker/CrazyParser).
 It started as a fork, but by the time I made all the changes I wanted, I realized that I had almost completely different
 code, with a similar concept. The main differences are:
 
