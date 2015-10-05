@@ -91,9 +91,10 @@ def twist_query(dnstwist_path, domain):
     output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
     dnstwist_csv = DictReader(StringIO(str(output)))
     try:
+        # Skip first row; it contains original domain
         next(dnstwist_csv)
-    # skip first row; it contains original domain
     except StopIteration:
+        # Exception raised if there are no rows after the header; no domains
         return []
     for row in dnstwist_csv:
         del row["SSDEEP"]
@@ -176,7 +177,7 @@ def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
 
 
 def generate_output(results, config_directory, output_path):
-    """"PWrites output files"""
+    """"Writes output files"""
     domains = []
     # write out results
     # this file will only contain the header if there are no new results
