@@ -7,7 +7,7 @@ phishing domains have been registered"""
 from configparser import ConfigParser
 from argparse import ArgumentParser
 from os import path, getcwd
-from subprocess import check_output, PIPE
+from subprocess import check_output, PIPE, CalledProcessError
 from sys import stderr
 from io import StringIO
 from csv import DictReader, DictWriter
@@ -117,8 +117,11 @@ def crazy_query(urlcrazy_path, domain, attempt=1):
         if attempt > max_attempts:
             print("Warning: Failed to parse URLCrazy output for {}".format(domain), file=stderr)
             return []
+    except CalledProcessError:
+        # Sometimes URLCrazy considers valid domains invalid and exits with 1
+        print("Warning: URLCrazy  refused to process {}".format(domain), file=stderr)
 
-        return crazy_query(urlcrazy_path, domain)
+        return crazy_query(urlcrazy_path, domain, attempt)
 
     urlcrazy_csv = DictReader(StringIO(output, newline=''))
     for row in urlcrazy_csv:
@@ -158,6 +161,7 @@ def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
     with open(my_domains_path, 'rU') as my_domains:
         for my_domain in my_domains:
             my_domain = my_domain.strip().lower()
+
             if tool_paths["dnstwist"]:
                 for row in twist_query(tool_paths["dnstwist"], my_domain):
                     if row['Domain'] not in known_domains:
@@ -259,12 +263,12 @@ def main():
     args = parser.parse_args()
 
     if not path.isdir(args.config):
-        print("ERROR! Specified configuration directory {} does not exist!".format(args.config))
+        print("ERROR! Specified configuration directory {} does not exist!".format(args.config), file=stderr)
         exit(-1)
 
     config_file_path = path.join(args.config, "settings.cfg")
     if not path.exists(config_file_path):
-        print("ERROR! {} does not exist!".format(config_file_path))
+        print("ERROR! {} does not exist!".format(config_file_path), file=stderr)
         exit(-1)
 
     output_path = args.output
