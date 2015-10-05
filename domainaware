@@ -122,7 +122,7 @@ def crazy_query(urlcrazy_path, domain, attempt=1):
         return crazy_query(urlcrazy_path, domain, attempt)
     except CalledProcessError:
         # Sometimes URLCrazy considers valid domains invalid and exits with 1
-        print("Warning: URLCrazy refused to process {}".format(domain), file=stderr)
+        print("Warning: URLCrazy does not recognize {} as a valid domain".format(domain), file=stderr)
         return []
     urlcrazy_csv = DictReader(StringIO(output, newline=''))
     for row in urlcrazy_csv:
