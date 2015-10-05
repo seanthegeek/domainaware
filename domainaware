@@ -94,7 +94,7 @@ def twist_query(dnstwist_path, domain):
         next(dnstwist_csv)
     # skip first row; it contains original domain
     except StopIteration:
-        return None
+        return []
     for row in dnstwist_csv:
         del row["SSDEEP"]
         rows.append(row)
