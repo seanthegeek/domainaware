@@ -75,9 +75,11 @@ def crazy_twist(crazy_row):
         "Fuzzer": fuzzer,
         "Domain": crazy_row["Typo"],
         "A": crazy_row["DNS-A"],
-        "MX": crazy_row["DNS-MX"],
-        "Country": convert_country(crazy_row["Country-A"])
+        "MX": crazy_row["DNS-MX"]
     }
+
+    if crazy_row['Country-A']:
+        twist_row['Country'] = convert_country(crazy_row["Country-A"])
 
     return twist_row
 
@@ -100,26 +102,21 @@ def twist_query(dnstwist_path, domain):
     return rows
 
 
-def crazy_query(urlcrazy_path, domain):
+def crazy_query(urlcrazy_path, domain, attempt=1):
     """Query URLCrazy"""
+    max_attempts = 2
     rows = []
     dt_args = [urlcrazy_path, '-f', 'csv', domain]
     try:
         output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
         output = str(output)
         output = output.replace('\0', '')
-    except UnicodeDecodeError:
-        print("Warning: Failed to parse URLCrazy output for {}".format(domain), file=stderr)
-        crazy_query(urlcrazy_path, domain)
-        # continue
-        return crazy_query(urlcrazy_path, domain)
-    except ProcessLookupError:
-        print("Warning: Failed to parse URLCrazy output for {}".format(domain), file=stderr)
-        return crazy_query(urlcrazy_path, domain)
-        # continue
-    except ChildProcessError:
-        print("Warning: URLCrazy crashed while processing {}".format(domain), file=stderr)
-        # continue
+    except (UnicodeDecodeError, ProcessLookupError, ChildProcessError):
+        attempt += 1
+        if attempt > max_attempts:
+            print("Warning: Failed to parse URLCrazy output for {}".format(domain), file=stderr)
+            return []
+
         return crazy_query(urlcrazy_path, domain)
 
     urlcrazy_csv = DictReader(StringIO(output, newline=''))
