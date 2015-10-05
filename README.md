@@ -7,9 +7,9 @@ wrapper for emailing security staff when possible typo sqatting/spear phishing d
 ## Dependencies
 
 - Python 3
-- Ruby
 - [Requests](https://pypi.python.org/pypi/requests/)
 - [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
+    - Ruby
 - [dnstwist](https://github.com/seanthegeek/dnstwist/tree/patch-1)
   - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
