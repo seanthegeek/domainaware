@@ -302,6 +302,7 @@ def main():
         if args.email:
             email_config["body"] = email_config["stale_body"]
             send_mail(**email_config)
+            print("ERROR! Domains from the last run have not been added to knowndomains.csv. Exiting...", file=stderr)
             exit(2)
 
     results = find_new_domains(paths_config, my_domains_path, known_domains_path, **dt_config)
