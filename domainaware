@@ -236,8 +236,6 @@ def send_mail(**kwargs):
     mail_server.sendmail(kwargs["from"], kwargs["to"].split(COMMASPACE), msg.as_string())
     mail_server.quit()
 
-    mailer.stop()
-
 
 def mail_report(output_file_path, **kwargs):
     """Mail the report"""
