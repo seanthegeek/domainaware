@@ -105,7 +105,7 @@ def twist_query(dnstwist_path, domain):
 
 def crazy_query(urlcrazy_path, domain, attempt=1):
     """Query URLCrazy"""
-    max_attempts = 3
+    max_attempts = 4
     rows = []
     dt_args = [urlcrazy_path, '-f', 'csv', domain]
     try:
