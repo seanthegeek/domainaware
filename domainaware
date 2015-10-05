@@ -14,7 +14,11 @@ from io import StringIO
 from csv import DictReader, DictWriter
 
 from requests import get
-from marrow.mailer import Mailer, Message
+from smtplib import SMTP
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE
 
 __author__ = 'Sean Whalen'
 __version__ = '1.1.4'
@@ -202,31 +206,35 @@ def generate_output(results, config_directory, output_path):
 
 def send_mail(**kwargs):
     """Sends an email message"""
-    mailer_config = {
-        'manager.use': 'immediate',
-        'transport.use': 'smtp',
-        'transport.host': kwargs['host'],
-    }
+    msg = MIMEMultipart()
+    msg["From"] = kwargs["from"]
+    msg["To"] = kwargs['to']
+    msg["Subject"] = kwargs["subject"]
 
-    if kwargs["port"]:
-        mailer_config["transport.port"] = kwargs["port"]
-    if kwargs["username"]:
-        mailer_config["transport.username"] = kwargs["username"]
-    if kwargs["password"]:
-        mailer_config["transport.password"] = kwargs["password"]
-
-    mailer = Mailer(mailer_config)
-    mailer.start()
-
-    message = Message(author=kwargs['from'], to=kwargs["to"].split(", "))
-    message.subject = kwargs["subject"]
-    message.plain = kwargs["body"]
+    msg.attach(MIMEText(kwargs['body']))
 
     if "files" in kwargs:
-        for file_path in kwargs['files']:
-            message.attach(file_path)
+        files = kwargs['files']
+    else:
+        files = None
 
-    mailer.send(message)
+    for f in files or []:
+        with open(f, "rb") as fil:
+            msg.attach(MIMEApplication(
+                fil.read(),
+                Content_Disposition='attachment; filename="{}"'.format(path.basename(f)),
+                Name=path.basename(f)
+            ))
+
+    mail_server = SMTP(kwargs["host"], kwargs["port"])
+    mail_server.ehlo()
+    if kwargs["starttls"].lower() == "true":
+        mail_server.starttls()
+        mail_server.ehlo()
+    if kwargs["username"]:
+        mail_server.login(kwargs["username"], kwargs["password"])
+    mail_server.sendmail(kwargs["from"], kwargs["to"].split(COMMASPACE), msg.as_string())
+    mail_server.quit()
 
     mailer.stop()
 

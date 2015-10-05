@@ -8,7 +8,6 @@ wrapper for emailing security staff when possible typo sqatting/spear phishing d
 
 - Python 3
 - Ruby
-- [marrow.mailer](https://pypi.python.org/pypi/marrow.mailer)
 - [Requests](https://pypi.python.org/pypi/requests/)
 - [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
 - [dnstwist](https://github.com/seanthegeek/dnstwist/tree/patch-1)
