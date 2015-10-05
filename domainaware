@@ -16,7 +16,7 @@ from requests import get
 from marrow.mailer import Mailer, Message
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.2'
+__version__ = '1.1.3'
 
 
 def dt_whois(domain, **kwargs):
@@ -192,7 +192,6 @@ def generate_output(results, config_directory, output_path):
         for row in results:
             domains.append(row['Domain'])
             writer.writerow(row)
-    outfile.close()
 
     with open(path.join(config_directory, "last_domains"), "w") as last_domains_file:
         last_domains_file.writelines(domains)
