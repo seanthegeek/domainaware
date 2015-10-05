@@ -30,7 +30,10 @@ def dt_whois(domain, **kwargs):
     response = get(url, headers=headers, params=params)
     if response.status_code == 403:
         raise RuntimeError("DomainTools authentication failed")
-    if response.status_code == 404:
+    parsed_response = response.json()
+    if "error" in parsed_response:
+        error = parsed_response['error']['message']
+        print("Warning: DomainTools error for domain  {}: {}".format(domain, error), file=stderr)
         return dict()
     return response.json()["response"]
 
@@ -112,6 +115,7 @@ def crazy_query(urlcrazy_path, domain, attempt=1):
         output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
         output = str(output)
         output = output.replace('\0', '')
+        # URLCrazy frequently returns bad output, so keep trying :\
     except (UnicodeDecodeError, ProcessLookupError, ChildProcessError):
         attempt += 1
         if attempt > max_attempts:
