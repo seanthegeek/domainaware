@@ -4,6 +4,7 @@
 """A dnstwist and/or URLCrazy wrapper for emailing security staff when possible typo sqatting/spear
 phishing domains have been registered"""
 
+from time import sleep
 from configparser import ConfigParser
 from argparse import ArgumentParser
 from os import path, getcwd
@@ -16,7 +17,7 @@ from requests import get
 from marrow.mailer import Mailer, Message
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 
 
 def dt_whois(domain, **kwargs):
@@ -33,7 +34,7 @@ def dt_whois(domain, **kwargs):
     parsed_response = response.json()
     if "error" in parsed_response:
         error = parsed_response['error']['message']
-        print("Warning: DomainTools error for domain  {}: {}".format(domain, error), file=stderr)
+        print("Warning: DomainTools error for domain {}: {}".format(domain, error), file=stderr)
         return dict()
     return response.json()["response"]
 
@@ -71,9 +72,6 @@ def crazy_twist(crazy_row):
     if fuzzer in fuzzer_map:
         fuzzer = fuzzer_map[fuzzer]
 
-    if crazy_row["DNS-A"] == "?":
-        crazy_row["DNS-A"] = None
-
     twist_row = {
         "Fuzzer": fuzzer,
         "Domain": crazy_row["Typo"],
@@ -108,7 +106,7 @@ def twist_query(dnstwist_path, domain):
 
 def crazy_query(urlcrazy_path, domain, attempt=1):
     """Query URLCrazy"""
-    max_attempts = 10
+    max_attempts = 4
     rows = []
     dt_args = [urlcrazy_path, '-f', 'csv', domain]
     try:
@@ -148,6 +146,7 @@ def add_dt(rows, **kwargs):
                 row["Updated"] = whois['registration']["updated"]
             if 'expires' in whois['registration']:
                 row["Expires"] = whois['registration']["expires"]
+        sleep(1)
 
     return rows
 
@@ -167,12 +166,12 @@ def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
 
             if tool_paths["dnstwist"]:
                 for row in twist_query(tool_paths["dnstwist"], my_domain):
-                    if row['Domain'] not in known_domains:
+                    if row['Domain'] not in known_domains and row['Domain'] not in new_domains:
                         new_domains.append(row)
 
             if tool_paths["urlcrazy"]:
                 for row in crazy_query(tool_paths["urlcrazy"], my_domain):
-                    if row["A"] == "":
+                    if row["A"] == '':
                         continue
                     if row['Domain'] not in known_domains and row['Domain'] not in new_domains:
                         new_domains.append(row)
