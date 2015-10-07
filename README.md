@@ -4,6 +4,12 @@
 A [dnstwist](https://github.com/elceef/dnstwist) and/or [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
 wrapper for emailing security staff when possible typo sqatting/spear phishing domains have been registered
 
+## How it works
+
+dnstwist and URLCrazy are domain name fuzzers. They generate lookalike and typo domains for a given domain, and then 
+look for A(AAA) and MX records for those domains to see if they are live. DomainAware keeps track of the results of 
+these scripts, so that new domains can be quickly identified.
+
 ## Dependencies
 
 - Python 3

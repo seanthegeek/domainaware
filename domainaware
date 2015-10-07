@@ -21,7 +21,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 
 
 def dt_whois(domain, **kwargs):
