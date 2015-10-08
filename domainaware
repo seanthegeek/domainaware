@@ -21,7 +21,7 @@ from email.utils import COMMASPACE
 from requests import get
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 
 
 def dt_whois(domain, **kwargs):
@@ -85,6 +85,10 @@ def crazy_twist(crazy_row):
 
     if crazy_row['Country-A']:
         twist_row['Country'] = convert_country(crazy_row["Country-A"])
+
+    # Sometimes the CrazyURL MX row is actually the TLD row :\
+    if twist_row["MX"] == twist_row["Domain"].split(".")[-1]:
+        twist_row["MX"] = ''
 
     return twist_row
 
