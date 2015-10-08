@@ -12,13 +12,13 @@ from subprocess import check_output, PIPE, CalledProcessError
 from sys import stderr
 from io import StringIO
 from csv import DictReader, DictWriter
-
-from requests import get
 from smtplib import SMTP
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
+
+from requests import get
 
 __author__ = 'Sean Whalen'
 __version__ = '1.1.6'
