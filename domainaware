@@ -21,7 +21,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.5'
+__version__ = '1.1.6'
 
 
 def dt_whois(domain, **kwargs):
@@ -175,7 +175,7 @@ def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
 
             if tool_paths["urlcrazy"]:
                 for row in crazy_query(tool_paths["urlcrazy"], my_domain):
-                    if row["A"] == '':
+                    if row["A"] == '' and row["MX"] == '':
                         continue
                     if row['Domain'] not in known_domains and row['Domain'] not in new_domains:
                         new_domains.append(row)
