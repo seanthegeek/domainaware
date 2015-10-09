@@ -20,9 +20,14 @@ these scripts, so that new domains can be quickly identified.
   - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
     - [MaxMind Legacy Country GeoIP Database](https://dev.maxmind.com/geoip/legacy/install/country/)
+    
+To install the dependencies on Debian/Ubuntu systems, run:
 
-Please note: There is currently [a bug](https://github.com/elceef/dnstwist/pull/27) in dnstwist that causes it to generate invalid CSV data, breaking DomainAware.
-Please use the version from [my branch](https://github.com/seanthegeek/dnstwist/tree/patch-1) until the patch is merged.
+    $ sudo apt-get install python3-pip python3-dev ruby libgeoip-dev geoip-database
+    $ sudo pip3 install requests dnspython GeoIP whois
+    $ sudo apt-get install build-essential libffi-dev automake autoconf libtool
+    $ sudo BUILD_LIB=1 pip3 install ssdeep
+    
 
 ## Use
 

@@ -21,7 +21,7 @@ from email.utils import COMMASPACE
 from requests import get
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.7'
+__version__ = '1.1.8'
 
 
 def dt_whois(domain, **kwargs):
@@ -161,33 +161,36 @@ def add_dt(rows, **kwargs):
 
 def find_new_domains(tool_paths, my_domains_path, known_domains_path, **kwargs):
     """"Returns suspicious domain information as a list of dictionaries"""
-    known_domains = []
-    new_domains = []
+    known_domains = set()
+    rows = []
     with open(known_domains_path, 'r') as known_domains_file:
         known_domains_csv = DictReader(known_domains_file)
         for row in known_domains_csv:
-            known_domains.append(row["Domain"])
+            known_domains.add(row["Domain"])
 
     with open(my_domains_path, 'rU') as my_domains:
         for my_domain in my_domains:
             my_domain = my_domain.strip().lower()
+            known_domains.add(my_domain)
 
             if tool_paths["dnstwist"]:
                 for row in twist_query(tool_paths["dnstwist"], my_domain):
-                    if row['Domain'] not in known_domains and row['Domain'] not in new_domains:
-                        new_domains.append(row)
+                    if row['Domain'] not in known_domains:
+                        rows.append(row)
+                        known_domains.add(row['Domain'])
 
             if tool_paths["urlcrazy"]:
                 for row in crazy_query(tool_paths["urlcrazy"], my_domain):
                     if row["A"] == '' and row["MX"] == '':
                         continue
-                    if row['Domain'] not in known_domains and row['Domain'] not in new_domains:
-                        new_domains.append(row)
+                    if row['Domain'] not in known_domains:
+                        rows.append(row)
+                        known_domains.add(row['Domain'])
 
     if kwargs["api_username"] and kwargs["api_key"]:
-        new_domains = add_dt(new_domains, **kwargs)
+        rows = add_dt(rows, **kwargs)
 
-    return sorted(new_domains, key=get_row_domain)
+    return sorted(rows, key=get_row_domain)
 
 
 def generate_output(results, config_directory, output_path):
