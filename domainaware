@@ -12,7 +12,7 @@ from subprocess import check_output, PIPE, CalledProcessError
 from sys import stderr
 from io import StringIO
 from csv import DictReader, DictWriter
-from smtplib import SMTP
+from smtplib import SMTP, SMTPNotSupportedError
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
@@ -21,12 +21,12 @@ from email.utils import COMMASPACE
 from requests import get
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.8'
+__version__ = '1.1.9'
 
 
 def dt_whois(domain, **kwargs):
     """Returns WHOIS data from DomainTools"""
-    user_agent = "domainalert/{}".format(__version__)
+    user_agent = "domainaware/{}".format(__version__)
     headers = {"User-Agent": user_agent}
     params = dict(api_username=kwargs["api_username"], api_key=kwargs["api_key"])
     url = "https://api.domaintools.com/v1/{}/whois".format(domain)
@@ -235,9 +235,11 @@ def send_mail(**kwargs):
 
     mail_server = SMTP(kwargs["host"], kwargs["port"])
     mail_server.ehlo()
-    if kwargs["starttls"].lower() == "true":
+    try:
         mail_server.starttls()
-        mail_server.ehlo()
+    except SMTPNotSupportedError:
+        pass  # Try STARTTLS, but continue if it fails
+    mail_server.ehlo()
     if kwargs["username"]:
         mail_server.login(kwargs["username"], kwargs["password"])
     mail_server.sendmail(kwargs["from"], kwargs["to"].split(COMMASPACE), msg.as_string())
@@ -255,10 +257,7 @@ def mail_report(output_file_path, **kwargs):
     if num_domains > 0:
         kwargs["files"] = [output_file_path]
         kwargs["body"] = kwargs["new_results_body"]
-    else:
-        kwargs["body"] = kwargs["no_new_results_body"]
-
-    send_mail(**kwargs)
+        send_mail(**kwargs)
 
 
 def main():
