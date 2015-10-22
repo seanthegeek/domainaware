@@ -12,7 +12,7 @@ from subprocess import check_output, PIPE, CalledProcessError
 from sys import stderr
 from io import StringIO
 from csv import DictReader, DictWriter
-from smtplib import SMTP, SMTPNotSupportedError
+from smtplib import SMTP
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
@@ -237,7 +237,7 @@ def send_mail(**kwargs):
     mail_server.ehlo()
     try:
         mail_server.starttls()
-    except SMTPNotSupportedError:
+    except:
         pass  # Try STARTTLS, but continue if it fails
     mail_server.ehlo()
     if kwargs["username"]:
@@ -251,7 +251,7 @@ def mail_report(output_file_path, **kwargs):
     num_lines = 0
     num_domains = 0
     with open(output_file_path, 'rbU') as output_file:
-        for line in output_file:
+        for _ in output_file:
             num_lines += 1
             num_domains = num_lines - 1  # Ignore CSV header in count
     if num_domains > 0:
