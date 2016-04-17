@@ -40,14 +40,14 @@ If you have a subscription to the
 [DomainTools WHOIS APIs](https://www.domaintools.com/products/api-integration/pricing/), you can add your credentials to
 include the registrar name, registrant name, creation date, updated date, and expiration date in the domainaware
 results. Both the plain WHOIS APIs and the parsed WHOIS APIs provide this same basic information, but you might have 
-access to one and not the other, with different URLs, so specify the flavor using the `parsed` parsed setting.
+access to one and not the other, with different URLs, so specify the flavor using the `parsed` setting.
 
-Determine the critical domains the critical domains that you would like to monitor; for example, key brands.
-Add those domains to `mydomains.csv`, one per line. Include any and all ligament TLD variants, even if they are not
+Determine the critical domains that you would like to monitor; for example, key brands.
+Add those domains to `mydomains.csv`, one per line. Include any and all legitimate TLD variants, even if they are not
 actually used at all, except typo variations.
 
 Add any other domains you or your organisation may own under the `Domain` header in `knowndomains.csv`, including any 
-owned typo domains. Add a reason like `Valid` for each domain. The `Reason` field is for the use of humans, and is not 
+owned typo domains. Add a reason like `Valid` for each domain. The `Notes` field is for the use of humans, and is not 
 used by the script. The file is simply used by the analyst to keep track of all domains that have been reviewed.
 
 Run the script for the first time:
@@ -56,7 +56,7 @@ Run the script for the first time:
 
 Open `output.csv`. Add all of the domains to `knowndomains.csv`, then review each domain to see if it's valid, or 
 if it's something you should add alerts and/or blocks for with your security controls. The domains are not automatically
-added so that that human review is required. If the script detects that that there ate domains from its last run that 
+added so that that human review is required. If the script detects that that there are domains from its last run that 
 are not in `knowndomains.csv`, it will send an email notice of this and exit, so that analysts have a chance to review
 all domains before alerts for new ones are issued.
 
@@ -64,8 +64,8 @@ It is recommended to run the script once a day, either manually, or via cron.
 
 For recording and tracking threat information, check out the [CRITs](https://github.com/crits/crits) project.
 
-If you need reliable external SMTP service, [Mandrill](https://www.mandrill.com/) from MailChimp 
-provides low-cost service for transactional mail.
+If you need reliable external SMTP service, [Elastic Email](https://elasticemail.com/)
+provides low-cost service.
 
 Check for and download new versions of dnstwist regularly.
 
