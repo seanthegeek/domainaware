@@ -110,7 +110,7 @@ def twist_query(dnstwist_path, domain):
                            Domain=row["domain-name"],
                            A=row["dns-a"],
                            AAAA=row["dns-aaaa"],
-                           MX=row["dns-ms"],
+                           MX=row["dns-mx"],
                            NS=row["dns-ns"],
                            Country=row["geoip-country"]
                            )
