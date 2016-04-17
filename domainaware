@@ -304,19 +304,19 @@ def main():
     dt_config = dict(config.items("domaintools"))
 
     last_domains_path = path.join(args.config, "last_domains")
-    stale = True
+    stale = False
     if path.exists(last_domains_path):
         with open(last_domains_path) as last_domains_file:
             last_domains = last_domains_file.readlines()
         with open(known_domains_path) as known_csv:
             csv_reader = DictReader(known_csv)
+            known_domains = []
             for csv_row in csv_reader:
-                if csv_row['Domain'] not in last_domains:
-                    stale = False
+                known_domains.append(csv_row["Domain"])
+            for domain in last_domains:
+                if domain not in known_domains:
+                    stale = True
                     break
-    else:
-        stale = False
-
     if stale:
         if args.email:
             email_config["body"] = email_config["stale_body"]
