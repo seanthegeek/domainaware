@@ -106,14 +106,14 @@ def twist_query(dnstwist_path, domain):
         # Exception raised if there are no rows after the header; no domains
         return []
     for row in dnstwist_csv:
-        standard_row= dict(Fuzzer=row["fuzzer"],
-                           Domain=row["domain-name"],
-                           A=row["dns-a"],
-                           AAAA=row["dns-aaaa"],
-                           MX=row["dns-mx"],
-                           NS=row["dns-ns"],
-                           Country=row["geoip-country"]
-                           )
+        standard_row = dict(Fuzzer=row["fuzzer"],
+                            Domain=row["domain-name"],
+                            A=row["dns-a"],
+                            AAAA=row["dns-aaaa"],
+                            MX=row["dns-mx"],
+                            NS=row["dns-ns"],
+                            Country=row["geoip-country"]
+                            )
         rows.append(standard_row)
 
     return rows
@@ -211,11 +211,11 @@ def generate_output(results, config_directory, output_path):
         writer = DictWriter(outfile, fieldnames=fieldnames)
         writer.writeheader()
         for row in results:
-            lines.append("{0}\n".format(row['Domain']))
+            lines.append(row['Domain'])
             writer.writerow(row)
 
     with open(path.join(config_directory, "last_domains"), "w") as last_domains_file:
-        last_domains_file.write(lines)
+        last_domains_file.write("\n".join(lines))
 
 
 def send_mail(**kwargs):
