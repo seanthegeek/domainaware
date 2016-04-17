@@ -23,10 +23,10 @@ these scripts, so that new domains can be quickly identified.
     
 To install the dependencies on Debian/Ubuntu systems, run:
 
-    $ sudo apt-get install python3-pip python3-dev ruby libgeoip-dev geoip-database
+    $ sudo apt-get install python3-pip python3-dev ruby libgeoip-dev \
+     geoip-database python3-ssdeep
     $ sudo pip3 install requests dnspython GeoIP whois
-    $ sudo apt-get install build-essential libffi-dev automake autoconf libtool
-    $ sudo BUILD_LIB=1 pip3 install ssdeep
+
     
 
 ## Use
