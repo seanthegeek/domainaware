@@ -21,7 +21,7 @@ from email.utils import COMMASPACE
 from requests import get
 
 __author__ = 'Sean Whalen'
-__version__ = '1.1.9'
+__version__ = '1.2.0'
 
 
 def dt_whois(domain, **kwargs):
@@ -107,7 +107,7 @@ def twist_query(dnstwist_path, domain):
         return []
     for row in dnstwist_csv:
         standard_row= dict(Fuzzer=row["fuzzer"],
-                           Domain=row["Domain"],
+                           Domain=row["domain-name"],
                            A=row["dns-a"],
                            AAAA=row["dns-aaaa"],
                            MX=row["dns-ms"],
