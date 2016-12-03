@@ -57,6 +57,4 @@ docs/_build/
 target/
 
 .idea/
-*.csv
-*.cfg
-last_domains
+config.py

@@ -1,0 +1,3 @@
+[submodule "dnstwist"]
+	path = dnstwist
+	url = https://github.com/elceef/dnstwist

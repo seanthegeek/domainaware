@@ -1,0 +1,6 @@
+requests
+dnspython
+GeoIP
+flask
+peewee
+flask-login
