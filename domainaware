@@ -87,10 +87,9 @@ def crazy_twist(crazy_row):
         twist_row['Country'] = convert_country(crazy_row["Country-A"])
 
     # Sometimes the URLCrazy MX row is actually the TLD row :\
-    if twist_row["MX"] == twist_row["Domain"].split(".")[-1]:
-        twist_row["MX"] = ''
-    # Cater for TLDs that contain "." (e.g. "com.au")
-    if twist_row["MX"] == twist_row["Domain"].split(".", 1)[1]:
+    if twist_row["MX"] == twist_row["Domain"].split(".")[-1] \
+    or twist_row["MX"] == twist_row["Domain"].split(".",1)[-1] \
+    or twist_row["MX"] == twist_row["Domain"].split(".",2)[-1]:
         twist_row["MX"] = ''
 
     return twist_row
