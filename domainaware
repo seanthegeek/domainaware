@@ -92,6 +92,11 @@ def crazy_twist(crazy_row):
     or twist_row["MX"] == twist_row["Domain"].split(".",2)[-1]:
         twist_row["MX"] = ''
 
+    # Sometimes the URLCrazy Country-A row is actually the MX row... This should really be fixed in URLcrazy...
+    if crazy_row["CC-A"] == '' and "." in crazy_row["Country-A"]:
+        twist_row["MX"] = crazy_row["Country-A"],
+        twist_row["Country"] = ''
+
     return twist_row
 
 
