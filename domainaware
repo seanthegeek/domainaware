@@ -103,7 +103,7 @@ def crazy_twist(crazy_row):
 def twist_query(dnstwist_path, domain):
     """Query dnstwist"""
     rows = []
-    dt_args = [dnstwist_path, '-gr', domain]
+    dt_args = [dnstwist_path, '-gr', '-f', 'csv', domain]
     output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
     dnstwist_csv = DictReader(StringIO(str(output)))
     try:
@@ -132,14 +132,14 @@ def crazy_query(urlcrazy_path, domain, attempt=1):
     rows = []
     dt_args = [urlcrazy_path, '-f', 'csv', domain]
     try:
-        output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
-        output = str(output)
+        output = check_output(dt_args, stderr=PIPE)
+        output = str(output, encoding="utf-8", errors="ignore")
         output = output.replace('\0', '')
         # URLCrazy frequently returns bad output, so keep trying :\
-    except (UnicodeDecodeError, ProcessLookupError, ChildProcessError):
+    except (UnicodeDecodeError, ProcessLookupError, ChildProcessError) as e:
         attempt += 1
         if attempt > max_attempts:
-            print("Warning: Failed to parse URLCrazy output for {}".format(domain), file=stderr)
+            print("Warning: Failed to parse URLCrazy output for {}: {}".format(domain, e), file=stderr)
             return []
         return crazy_query(urlcrazy_path, domain, attempt)
     except CalledProcessError:
