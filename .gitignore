@@ -60,3 +60,6 @@ target/
 *.csv
 *.cfg
 last_domains
+
+*.csv
+*.cfg

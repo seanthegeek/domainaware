@@ -103,7 +103,7 @@ def crazy_twist(crazy_row):
 def twist_query(dnstwist_path, domain):
     """Query dnstwist"""
     rows = []
-    dt_args = [dnstwist_path, '-grc', domain]
+    dt_args = [dnstwist_path, '-gr', domain]
     output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
     dnstwist_csv = DictReader(StringIO(str(output)))
     try:
