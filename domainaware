@@ -140,7 +140,7 @@ def crazy_query(urlcrazy_path, domain, unregistered=False, attempt=1):
     dt_args = [urlcrazy_path, '-f', 'csv']
     if unregistered:
         dt_args += ["-i"]
-    dt_args += domain
+    dt_args += [domain]
     try:
         output = check_output(dt_args, stderr=PIPE)
         output = str(output, encoding="utf-8", errors="ignore")
