@@ -4,12 +4,16 @@
 """A dnstwist and/or URLCrazy wrapper for emailing security staff when possible typo sqatting/spear
 phishing domains have been registered"""
 
+import logging
+from sys import version_info
 from time import sleep
-from configparser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from argparse import ArgumentParser
 from os import path, getcwd
 from subprocess import check_output, PIPE, CalledProcessError
-from sys import stderr
 from io import StringIO
 from csv import DictReader, DictWriter
 from smtplib import SMTP
@@ -22,6 +26,10 @@ from requests import get
 
 __author__ = 'Sean Whalen'
 __version__ = '1.3.0'
+
+
+if version_info[0] >= 3:
+    unicode = unicode
 
 
 def dt_whois(domain, **kwargs):
@@ -39,9 +47,7 @@ def dt_whois(domain, **kwargs):
     parsed_response = response.json()
     if "error" in parsed_response:
         error = parsed_response['error']['message']
-        print("Warning: DomainTools error for domain {}: {}".format(domain,
-                                                                    error),
-              file=stderr)
+        logging.error("DomainTools error for domain {}: {}".format(domain, error))
         return dict()
     return response.json()["response"]
 
@@ -107,12 +113,12 @@ def crazy_twist(crazy_row):
 def twist_query(dnstwist_path, domain, unregistered=False):
     """Query dnstwist"""
     rows = []
-    dt_args = [dnstwist_path, '-g', '-f', 'csv']
+    dt_args = [dnstwist_path, '-gmab', '-f', 'csv']
     if not unregistered:
         dt_args += ["-r"]
     dt_args += [domain]
-    output = check_output(dt_args, universal_newlines=True, stderr=PIPE)
-    dnstwist_csv = DictReader(StringIO(str(output)))
+    output = check_output(dt_args)
+    dnstwist_csv = DictReader(StringIO(unicode(output)))
     try:
         # Skip first row; it contains original domain
         next(dnstwist_csv)
@@ -143,21 +149,19 @@ def crazy_query(urlcrazy_path, domain, unregistered=False, attempt=1):
     dt_args += [domain]
     try:
         output = check_output(dt_args, stderr=PIPE)
-        output = str(output, encoding="utf-8", errors="ignore")
+        output = unicode(output, encoding="utf-8", errors="ignore")
         output = output.replace('\0', '')
+    except CalledProcessError as error:
+        # Sometimes URLCrazy considers valid domains invalid and exits with 1
+        logging.error("URLCrazy: {}".format(domain, error.output))
+        return []
+    except Exception as e:
         # URLCrazy frequently returns bad output, so keep trying :\
-    except (UnicodeDecodeError, ProcessLookupError, ChildProcessError) as e:
         attempt += 1
         if attempt > max_attempts:
-            print("Warning: Failed to parse URLCrazy output "
-                  "for {}: {}".format(domain, e), file=stderr)
+            logging.error("Failed to parse URLCrazy output for {}: {}".format(domain, e))
             return []
         return crazy_query(urlcrazy_path, domain, attempt)
-    except CalledProcessError:
-        # Sometimes URLCrazy considers valid domains invalid and exits with 1
-        print("Warning: URLCrazy does not recognize {} "
-              "as a valid domain".format(domain), file=stderr)
-        return []
     urlcrazy_csv = DictReader(StringIO(output, newline=''))
     for row in urlcrazy_csv:
         rows.append(crazy_twist(row))
@@ -317,14 +321,13 @@ def main():
     args = parser.parse_args()
 
     if not path.isdir(args.config):
-        print("ERROR! Specified configuration directory "
-              "{} does not exist!".format(args.config), file=stderr)
+        logging.error("Specified configuration directory "
+              "{} does not exist!".format(args.config))
         exit(-1)
 
     config_file_path = path.join(args.config, "settings.cfg")
     if not path.exists(config_file_path):
-        print("ERROR! {} does not exist!".format(config_file_path),
-              file=stderr)
+        logging.error("{} does not exist!".format(config_file_path))
         exit(-1)
 
     output_path = args.output
@@ -357,8 +360,8 @@ def main():
         if args.email:
             email_config["body"] = email_config["stale_body"]
             send_mail(**email_config)
-            print("ERROR! Domains from the last run have not been added to "
-                  "knowndomains.csv. Exiting...", file=stderr)
+            logging.error("Domains from the last run have not been added to "
+                  "knowndomains.csv. Exiting...")
             exit(2)
 
     results = find_new_domains(paths_config, my_domains_path,
