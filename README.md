@@ -23,7 +23,7 @@ these scripts, so that new domains can be quickly identified.
     
 To install the dependencies on Debian/Ubuntu systems, run:
 
-    sudo apt-get install python-pip python-dev ruby libgeoip-dev \
+    sudo apt-get install -y python-pip python-dev ruby libgeoip-dev \
      geoip-database python-ssdeep
     sudo -H pip install requests dnspython GeoIP whois
 
