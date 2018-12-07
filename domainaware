@@ -367,7 +367,7 @@ def main():
             exit(2)
 
     results = find_new_domains(paths_config, my_domains_path,
-                               known_domains_path, unregistered=False,
+                               known_domains_path, unregistered=args.unregistered,
                                **dt_config)
 
     generate_output(results, args.config, output_path)
