@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""A dnstwist and/or URLCrazy wrapper for emailing security staff when possible typo sqatting/spear
-phishing domains have been registered"""
+"""A dnstwist and/or URLCrazy wrapper for emailing security staff when
+possible typo sqatting/spear phishing domains have been registered"""
 
 import logging
 from sys import version_info
