@@ -25,7 +25,7 @@ To install the dependencies on Debian/Ubuntu systems, run:
 
     sudo apt-get install -y python-pip python-dev ruby libgeoip-dev \
      geoip-database python-ssdeep
-    sudo -H pip install requests dnspython GeoIP whois
+    sudo -H pip2 install requests dnspython GeoIP whois
 
     
 
