@@ -12,20 +12,20 @@ these scripts, so that new domains can be quickly identified.
 
 ## Dependencies
 
-- Python 3
 - [Requests](https://pypi.python.org/pypi/requests/)
 - [URLCrazy](http://www.morningstarsecurity.com/research/urlcrazy)
     - Ruby
-- [dnstwist](https://github.com/seanthegeek/dnstwist/tree/patch-1)
+- [dnstwist](https://github.com/elceef/dnstwist)
+  - Python 2
   - [DNS toolkit for Python](https://pypi.python.org/pypi/dnspython)
   - [Python GeoIP](https://pypi.python.org/pypi/GeoIP/)
     - [MaxMind Legacy Country GeoIP Database](https://dev.maxmind.com/geoip/legacy/install/country/)
     
 To install the dependencies on Debian/Ubuntu systems, run:
 
-    $ sudo apt-get install python3-pip python3-dev ruby libgeoip-dev \
-     geoip-database python3-ssdeep
-    $ sudo pip3 install requests dnspython GeoIP whois
+    sudo apt-get install -y python-pip python-dev ruby libgeoip-dev \
+     geoip-database python-ssdeep
+    sudo -H pip2 install requests dnspython GeoIP whois
 
     
 
