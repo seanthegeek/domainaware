@@ -333,7 +333,7 @@ def main():
         exit(-1)
 
     output_path = args.output
-    my_domains_path = path.join(args.config, 'mydomains.csv')
+    my_domains_path = path.join(args.config, 'mydomains.txt')
     known_domains_path = path.join(args.config, 'knowndomains.csv')
 
     config = ConfigParser(allow_no_value=True)
