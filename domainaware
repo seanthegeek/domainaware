@@ -119,7 +119,9 @@ def twist_query(dnstwist_path, domain, unregistered=False):
         dt_args += ["-r"]
     dt_args += [domain]
     output = check_output(dt_args)
-    dnstwist_csv = DictReader(StringIO(unicode(output)))
+    output = unicode(output, encoding="utf-8", errors="ignore")
+    output = output.replace('\0', '')
+    dnstwist_csv = DictReader(StringIO(output, newline=''))
     try:
         # Skip first row; it contains original domain
         next(dnstwist_csv)
