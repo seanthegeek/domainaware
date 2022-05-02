@@ -350,7 +350,7 @@ def main():
     stale = False
     if path.exists(last_domains_path):
         with open(last_domains_path) as last_domains_file:
-            last_domains = last_domains_file.readlines()
+            last_domains = [line.rstrip() for line in last_domains_file]
         with open(known_domains_path) as known_csv:
             csv_reader = DictReader(known_csv)
             known_domains = []
