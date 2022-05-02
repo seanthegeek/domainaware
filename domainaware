@@ -363,6 +363,7 @@ def main():
     if stale:
         if args.email:
             email_config["body"] = email_config["stale_body"]
+            email_config["files"] = [output_path]
             send_mail(**email_config)
             logging.error("Domains from the last run have not been added to "
                   "knowndomains.csv. Exiting...")
